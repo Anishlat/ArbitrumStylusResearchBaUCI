@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+
+/** This ERC721 contract has the below features and therefore is considered a "Complex ERC20 Contract"
+Burnable - Token holders will be able to destroy their tokens.
+Pasuable - Privileged accounts will be able to pause the functionality marked as whenNotPaused. Useful for emergency response.
+
+UUPS Upgradeability - Uses simpler proxy with less overhead, requires including extra code in your contract. Allows flexibility for authorizing upgrades.
+*/
+
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract TESTBaUCI is Initializable, ERC721Upgradeable, ERC721PausableUpgradeable, OwnableUpgradeable, ERC721BurnableUpgradeable, UUPSUpgradeable {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address initialOwner) initializer public {
+        __ERC721_init("TESTBaUCI", "TUCI");
+        __ERC721Pausable_init();
+        __Ownable_init(initialOwner);
+        __ERC721Burnable_init();
+        __UUPSUpgradeable_init();
+    }
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
+
+    // The following functions are overrides required by Solidity.
+
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721Upgradeable, ERC721PausableUpgradeable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+}
